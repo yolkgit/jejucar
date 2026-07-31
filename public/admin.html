@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>관리자 · 제주 렌터카 특가</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 9px; margin-bottom: 16px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px;
+  }
+  .stat .label { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
+  .stat .value { font-size: 22px; font-weight: 900; letter-spacing: -0.6px; margin-top: 2px; }
+  .stat.warn .value { color: var(--amber); }
+
+  .row-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 11px; margin-bottom: 8px;
+  }
+  .row-head { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .row-head .grow { flex: 1; min-width: 0; }
+  .row-title { font-weight: 800; font-size: 14.5px; }
+  .row-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; line-height: 1.5; }
+  .row-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .mini-btn {
+    padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border-strong);
+    font-size: 12px; font-weight: 700; color: var(--text-2); background: var(--surface);
+  }
+  .mini-btn:hover { background: var(--surface-2); }
+  .mini-btn.good { border-color: var(--green); color: var(--green); }
+  .mini-btn.bad { border-color: var(--red); color: var(--red); }
+  .mini-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .mono { font-family: 'Consolas', ui-monospace, monospace; letter-spacing: .3px; }
+  .log-line { font-size: 11.5px; font-family: 'Consolas', ui-monospace, monospace; padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .log-line .st { font-weight: 800; }
+  .log-line .st.ok { color: var(--green); }
+  .log-line .st.blocked, .log-line .st.error { color: var(--red); }
+  .log-line .st.unchanged, .log-line .st.skipped { color: var(--text-3); }
+  .login-box { max-width: 340px; margin: 60px auto; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="logo">
+      <span class="dot" aria-hidden="true"></span>
+      <span>관리자</span>
+    </div>
+    <div class="spacer"></div>
+    <a class="ghost-btn" href="/" style="text-decoration:none">사용자 화면</a>
+    <button class="ghost-btn" id="logoutBtn" hidden>로그아웃</button>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+  <section id="loginView" class="login-box" hidden>
+    <div class="search-panel">
+      <div class="field">
+        <label for="pw">관리자 비밀번호</label>
+        <input type="password" id="pw" autocomplete="current-password">
+      </div>
+      <div id="loginErr" style="margin:10px 0"></div>
+      <button class="primary-btn" id="loginBtn">로그인</button>
+    </div>
+  </section>
+
+  <section id="appView" hidden>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="bookings" aria-selected="true">예약</button>
+      <button role="tab" data-tab="deals" aria-selected="false">딜</button>
+      <button role="tab" data-tab="sources" aria-selected="false">수집</button>
+    </div>
+
+    <div class="stat-grid" id="stats"></div>
+    <div id="tabBody"></div>
+  </section>
+
+</main>
+
+<div id="modalHost"></div>
+<div class="toast-host" id="toastHost" aria-live="assertive"></div>
+
+<script src="/admin.js"></script>
+</body>
+</html>

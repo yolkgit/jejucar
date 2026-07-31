@@ -1,0 +1,19 @@
+services:
+  jeju-rentcar:
+    build: .
+    container_name: jeju-rentcar
+    restart: unless-stopped
+    ports:
+      - "3008:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PORT=3000
+      - DB_PATH=/app/data/jeju.db
+      - TZ=Asia/Seoul
+      # 관리자 비밀번호 — 배포 시 .env 로 옮길 것
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-jeju2026}
+      # 수집기 자동 실행 (분 단위). 0 이면 자동 수집 끔.
+      - COLLECT_INTERVAL_MIN=${COLLECT_INTERVAL_MIN:-180}
+      # 크롤러가 보낼 User-Agent 연락처
+      - CRAWLER_CONTACT=${CRAWLER_CONTACT:-}

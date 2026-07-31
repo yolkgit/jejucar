@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="제주 렌터카 특급 할인 정보를 한 곳에서 비교하고 예약 신청하세요.">
+<meta name="color-scheme" content="light dark">
+<title>제주 렌터카 특가</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='13' fill='%23f47b20'/></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="logo" id="logo" role="button" tabindex="0">
+      <span class="dot" aria-hidden="true"></span>
+      <span>제주 렌터카 특가</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="ghost-btn" id="lookupBtn">예약 조회</button>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+  <!-- 검색 -->
+  <section class="search-panel" aria-label="특가 검색">
+    <div class="search-grid">
+      <div class="field full">
+        <label for="q">차종 · 업체 검색</label>
+        <input type="search" id="q" placeholder="예: 아반떼, 카니발, 제주엔젤카" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="pickupDate">대여일</label>
+        <input type="date" id="pickupDate">
+      </div>
+      <div class="field">
+        <label for="returnDate">반납일</label>
+        <input type="date" id="returnDate">
+      </div>
+      <div class="field full">
+        <span class="hint" id="rangeHint">날짜를 고르면 그 기간에 쓸 수 있는 특가만 보여줍니다.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 알림 배너 자리 -->
+  <div id="noticeHost"></div>
+
+  <!-- 필터 칩 -->
+  <nav class="chips" id="classChips" aria-label="차종 등급 필터"></nav>
+  <nav class="chips" id="quickChips" aria-label="빠른 필터"></nav>
+
+  <!-- 결과 -->
+  <div class="result-bar">
+    <span class="result-count" id="resultCount">불러오는 중…</span>
+    <div class="spacer"></div>
+    <label class="sr-only" for="sort">정렬</label>
+    <select class="sort-select" id="sort">
+      <option value="discount">할인율 높은 순</option>
+      <option value="price">낮은 가격 순</option>
+      <option value="priceDesc">높은 가격 순</option>
+      <option value="rating">평점 높은 순</option>
+      <option value="latest">최근 등록 순</option>
+    </select>
+  </div>
+
+  <div class="deal-list" id="dealList" aria-live="polite"></div>
+  <div class="pager" id="pager" hidden></div>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p><strong>제주 렌터카 특가</strong> — 특가 정보를 모아 보여주는 비교 서비스입니다.</p>
+    <p id="footerNote"></p>
+    <p style="margin-top:8px">
+      이 화면의 예약은 <strong>신청 접수</strong>이며 결제가 이루어지지 않습니다.
+      업체 확인 후 확정 여부를 안내합니다. 실제 요금·보험 조건은 업체 계약서를 기준으로 합니다.
+    </p>
+  </div>
+</footer>
+
+<div id="modalHost"></div>
+<div class="toast-host" id="toastHost" aria-live="assertive"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
