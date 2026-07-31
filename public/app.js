@@ -284,7 +284,11 @@ function buildQuery() {
 
 function dealCardHtml(d) {
   const badges = [];
-  badges.push(`<span class="badge-item discount">${d.discountPct}% 할인</span>`);
+  // 정가를 공개하지 않는 소스가 있다. 그때는 할인율 배지를 아예 달지 않는다.
+  // 임의의 기준가로 할인율을 만들어 붙이면 허위 표기가 된다.
+  if (d.discountPct !== null && d.discountPct !== undefined) {
+    badges.push(`<span class="badge-item discount">${d.discountPct}% 할인</span>`);
+  }
   if (d.dealType) badges.push(`<span class="badge-item deal-type">${esc(d.dealType)}</span>`);
   if (d.insurance) {
     badges.push(
@@ -315,7 +319,7 @@ function dealCardHtml(d) {
           <div class="deal-spec">${spec}</div>
         </div>
         <div class="deal-price">
-          <div class="deal-list-price">${won(d.listPrice)}원</div>
+          ${d.listPrice ? `<div class="deal-list-price">${won(d.listPrice)}원</div>` : '<div class="deal-list-price no-list">정가 미표기</div>'}
           <div class="deal-sale-price">${won(d.salePrice)}<span class="unit">원</span></div>
           <div class="deal-per">1일 기준${d.minDays > 1 ? ` · ${d.minDays}일~` : ''}</div>
         </div>
@@ -435,10 +439,12 @@ async function openDealDetail(id) {
       <div class="vendor">${esc(d.vendor)}</div>
       <div class="prices">
         <span class="sale">${won(d.salePrice)}원</span>
-        <span class="list">${won(d.listPrice)}원</span>
-        <span class="pct">${d.discountPct}%</span>
+        ${d.listPrice ? `<span class="list">${won(d.listPrice)}원</span>` : ''}
+        ${d.discountPct !== null && d.discountPct !== undefined ? `<span class="pct">${d.discountPct}%</span>` : ''}
       </div>
-      <div class="deal-per" style="margin-top:4px">1일 기준 요금</div>
+      <div class="deal-per" style="margin-top:4px">
+        1일 기준 요금${d.listPrice ? '' : ' · 업체가 정가를 공개하지 않아 할인율을 표시하지 않습니다'}
+      </div>
     </div>
 
     <table class="spec-table">

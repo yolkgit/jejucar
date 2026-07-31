@@ -153,11 +153,15 @@ test('normalizeDeal: 불량 입력을 이유와 함께 버린다', () => {
     [{ vendor_name: 'v', car_model: '레이', list_price: '90000', sale_price: '40000' }, /external_id/],
     [{ external_id: 'a', car_model: '레이' }, /업체명/],
     [{ external_id: 'a', vendor_name: 'v' }, /차종명/],
-    [{ external_id: 'a', vendor_name: 'v', car_model: '레이', sale_price: '가격문의' }, /할인가 파싱 실패/],
-    [{ external_id: 'a', vendor_name: 'v', car_model: '레이', sale_price: '30000' }, /정가 파싱 실패/],
+    [{ external_id: 'a', vendor_name: 'v', car_model: '레이', sale_price: '가격문의' }, /판매가 파싱 실패/],
+    // 정가를 "줬는데 못 읽은" 경우는 선택자 파손 신호이므로 버린다.
+    [
+      { external_id: 'a', vendor_name: 'v', car_model: '레이', list_price: '가격문의', sale_price: '30000' },
+      /정가 파싱 실패/,
+    ],
     [
       { external_id: 'a', vendor_name: 'v', car_model: '레이', list_price: '10000', sale_price: '20000' },
-      /할인가.*정가.*큼/,
+      /판매가.*정가.*큼/,
     ],
     [
       { external_id: 'a', vendor_name: 'v', car_model: '외계차XYZ', list_price: '90000', sale_price: '40000' },
@@ -169,6 +173,19 @@ test('normalizeDeal: 불량 입력을 이유와 함께 버린다', () => {
     const r = normalizeDeal(input, { sourceId: 1 });
     assert.equal(r.ok, false, `통과되면 안 되는 입력: ${JSON.stringify(input)}`);
     assert.match(r.reason, pattern);
+  }
+});
+
+test('normalizeDeal: 정가를 아예 주지 않으면 통과하고 list_price 는 null 이다', () => {
+  // 정가를 공개하지 않는 소스가 있다. 지어내면 허위 할인율이 된다.
+  for (const missing of [{}, { list_price: null }, { list_price: '' }, { list_price: '  ' }]) {
+    const r = normalizeDeal(
+      { external_id: 'a', vendor_name: '제주속으로', car_model: '더뉴아반떼', sale_price: '22,300', ...missing },
+      { sourceId: 1 }
+    );
+    assert.equal(r.ok, true, `거부됨: ${r.reason}`);
+    assert.equal(r.deal.list_price, null);
+    assert.equal(r.deal.sale_price, 22300);
   }
 });
 

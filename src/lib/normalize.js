@@ -234,14 +234,19 @@ function normalizeDeal(raw, { sourceId }) {
   if (!carModel) return { ok: false, reason: '차종명 없음' };
   if (!raw.external_id) return { ok: false, reason: 'external_id 없음' };
 
-  const listPrice = parsePrice(raw.list_price);
   const salePrice = parsePrice(raw.sale_price);
-  if (!salePrice) return { ok: false, reason: `할인가 파싱 실패: ${raw.sale_price}` };
+  if (!salePrice) return { ok: false, reason: `판매가 파싱 실패: ${raw.sale_price}` };
 
-  // 정가가 없으면 할인 여부를 판단할 수 없다. 할인 전용 앱이므로 버린다.
-  if (!listPrice) return { ok: false, reason: `정가 파싱 실패: ${raw.list_price}` };
-  if (salePrice > listPrice) {
-    return { ok: false, reason: `할인가(${salePrice})가 정가(${listPrice})보다 큼` };
+  // 정가는 선택 항목이다. 아예 공개하지 않는 소스가 있고, 그런 경우
+  // 정가를 지어내면 실제보다 큰 할인율이 표시된다.
+  // 단, 정가가 "주어졌는데 못 읽은" 경우는 파싱 오류이므로 버린다.
+  // 둘을 구분하지 않으면 선택자가 깨졌을 때 조용히 할인율만 사라진다.
+  const listGiven =
+    raw.list_price !== null && raw.list_price !== undefined && String(raw.list_price).trim() !== '';
+  const listPrice = listGiven ? parsePrice(raw.list_price) : null;
+  if (listGiven && !listPrice) return { ok: false, reason: `정가 파싱 실패: ${raw.list_price}` };
+  if (listPrice !== null && salePrice > listPrice) {
+    return { ok: false, reason: `판매가(${salePrice})가 정가(${listPrice})보다 큼` };
   }
 
   const extra = [raw.car_class, raw.notes, raw.title, raw.fuel].filter(Boolean).join(' ');

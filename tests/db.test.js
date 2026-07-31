@@ -41,9 +41,29 @@ test('discountPct: 내림 계산, 경계값 방어', () => {
   assert.equal(discountPct(3, 2), 33); // 33.33 → 내림
   assert.equal(discountPct(100, 100), 0); // 할인 없음
   assert.equal(discountPct(100, 200), 0); // 역전 시 0
-  assert.equal(discountPct(0, 0), 0); // 0 나눗셈 방어
-  assert.equal(discountPct(null, undefined), 0);
   assert.equal(discountPct(100000, 1), 99); // 99 상한 (CHECK 제약과 일치)
+});
+
+test('discountPct: 정가를 모르면 0 이 아니라 null 이다', () => {
+  // "할인 0%"와 "할인율을 알 수 없음"은 다른 상태다.
+  // 0 으로 뭉개면 정가 미공개 상품이 '할인 없음'으로 표시된다.
+  assert.equal(discountPct(null, 30000), null);
+  assert.equal(discountPct(undefined, 30000), null);
+  assert.equal(discountPct('', 30000), null);
+  assert.equal(discountPct(0, 0), null); // 0 나눗셈 방어
+  assert.equal(discountPct(null, undefined), null);
+});
+
+test('정가 없는 딜도 저장되고, 할인율은 NULL 로 남는다', () => {
+  const r = upsertDeal({ ...base, external_id: 'nolist', list_price: null, sale_price: 22300 });
+  assert.equal(r, 'inserted');
+
+  const row = db
+    .prepare('SELECT list_price, sale_price, discount_pct FROM deals WHERE external_id = ?')
+    .get('nolist');
+  assert.equal(row.list_price, null);
+  assert.equal(row.sale_price, 22300);
+  assert.equal(row.discount_pct, null, '정가가 없는데 할인율이 붙었다');
 });
 
 test('upsertDeal: 신규/갱신을 정확히 구분한다', () => {
@@ -52,7 +72,10 @@ test('upsertDeal: 신규/갱신을 정확히 구분한다', () => {
   assert.equal(upsertDeal({ ...base, external_id: 'd2' }), 'inserted');
   assert.equal(upsertDeal({ ...base, external_id: 'd2' }), 'updated');
 
-  const rows = db.prepare('SELECT external_id, sale_price, discount_pct FROM deals ORDER BY id').all();
+  // 다른 테스트가 넣은 딜에 영향받지 않도록 대상만 조회한다.
+  const rows = db
+    .prepare("SELECT external_id, sale_price, discount_pct FROM deals WHERE external_id IN ('d1','d2') ORDER BY external_id")
+    .all();
   assert.equal(rows.length, 2);
   assert.equal(rows[0].sale_price, 35000);
   assert.equal(rows[0].discount_pct, 60); // 89000 → 35000

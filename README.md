@@ -58,11 +58,16 @@ docker compose up -d --build     # 호스트 3008 → 컨테이너 3000
 
 ### 2. 진짜 문제는 robots.txt 가 아니라 CSR 이다
 
-가격이 HTML에 직접 들어 있는 사이트는 **jejussok.com 하나뿐**이다.
+가격이 정적 HTML에 들어 있는 사이트는 **jejussok.com 하나뿐**이다.
 carmore·dolharupang·jejupass·jarrent·jejuonecar 등은 전부 CSR이라
 날짜를 선택한 뒤 내부 API를 호출해야 가격이 나온다.
-cheerio 같은 정적 파서로는 **가격을 가져올 수 없다.**
-브라우저 자동화(Playwright)가 필요하고, 그건 이 컨테이너 구성 밖의 이야기다.
+cheerio 같은 정적 파서로는 가격을 가져올 수 없다 —
+브라우저 자동화(Playwright)나 내부 JSON 엔드포인트 역추적이 필요하다.
+
+**그래서 jejussok.com 어댑터는 실제로 만들어 넣었다** (`src/collector/adapters/jejussok.js`).
+라이브 사이트에서 실매물 6건을 수집하는 것까지 확인했다.
+다만 정적으로 얻을 수 있는 건 홈에 노출되는 6대 남짓이고,
+`/rent/list.php` 는 날짜 파라미터를 붙여도 CSR 이라 카드가 비어 온다.
 
 ### 3. 공개 API 는 없다
 
@@ -82,13 +87,47 @@ robots.txt 가 허용해도 민사 위험은 남는다.
 각 사이트 이용약관은 대부분 동적 렌더링이라 자동 확인이 안 됐다 —
 소스를 켜기 전에 **사람이 직접 약관을 확인**해야 한다.
 
-### 5. 결론 — 이 앱이 택한 구조
+### 5. 정가를 공개하지 않는 소스 — 할인율을 지어내지 않는다
+
+jejussok 페이지에는 정가가 이렇게 들어 있다.
+
+```html
+<div class="pro_price">
+  <!-- <div class="tprice"><s>185,000원</s></div> -->   ← 주석 처리
+  <div class="price"><strong>22,300</strong><span>원</span></div>
+</div>
+```
+
+주석 속 185,000원을 정가로 쓰면 22,300원이 **"88% 할인"** 으로 표시된다.
+그건 사이트가 표시하지 않기로 한 값이고, 제주도 할인율 상한 규칙과
+표시광고법이 정확히 겨냥하는 형태다. **어댑터는 의도적으로 읽지 않는다.**
+
+그래서 `deals.list_price` 와 `discount_pct` 는 **NULL 을 허용**한다.
+정가를 모르면 화면에 "정가 미표기"로 표시하고 할인율 배지를 달지 않는다.
+`discountPct()` 가 정가 없을 때 `0` 이 아니라 `null` 을 돌려주는 이유도 같다 —
+"할인 0%"와 "할인율을 알 수 없음"은 다른 상태이고 다르게 보여야 한다.
+
+### 6. 결론 — 이 앱이 택한 구조
 
 크롤링을 유일한 경로로 두지 않았다.
 
 1. **관리자 직접 등록**(`manual`) — 항상 동작. 크롤링이 0건이어도 앱이 빈 껍데기가 되지 않는다.
 2. **샘플 데이터**(`seed`) — 둘러보기용. 운영 시 비우면 된다.
-3. **수집 어댑터**(`crawler`/`api`) — robots.txt를 강제로 확인하며, **기본 전부 비활성**.
+3. **수집 어댑터**(`crawler`/`api`) — robots.txt를 강제로 확인하며, **기본 비활성**.
+   `jejussok` 하나가 실제로 동작하는 상태로 들어 있다.
+
+#### 수집 켜기
+
+이용약관을 직접 확인한 뒤에 켠다.
+
+```bash
+node scripts/source.js                # 소스 목록과 상태
+node scripts/source.js jejussok on    # 켜기
+npm run collect jejussok              # 즉시 1회 수집
+node scripts/show.js jejussok         # 수집 결과 확인
+```
+
+관리자 화면 `수집` 탭에서 버튼으로도 같은 일을 할 수 있다.
 
 ---
 
@@ -142,14 +181,33 @@ src/
     run-once.js             CLI
     adapters/
       _template.js          새 소스 추가용 템플릿 ('_' 시작 → 로드 안 함)
+      jejussok.js           제주속으로 — 실제 동작하는 크롤러
       manual.js             관리자 직접 등록
       seed.js               샘플 데이터
 public/
   index.html app.js         사용자 화면
   admin.html admin.js       관리자 화면
   style.css                 공통 (다크모드 자동)
-tests/                      db · normalize · collector 테스트 34개
+scripts/                    개발용 도구 (배포에 불필요)
+  probe.js                  URL 을 robots 준수 fetch 로 받아 가격 패턴·선택자 후보 출력
+  dump.js                   페이지를 저장하고 특정 문자열 주변 맥락 표시
+  analyze.js                저장된 HTML 을 cheerio 로 뜯어 선택자 확정
+  source.js                 수집 소스 켜기/끄기
+  show.js                   소스별 수집 결과 표로 출력
+tests/                      55개 (fixtures/ 에 실제 HTML 픽스처 포함)
 ```
+
+### 새 소스를 붙일 때의 작업 순서
+
+선택자를 추측해서 쓰면 반드시 깨진다. 실제 응답을 보고 시작한다.
+
+```bash
+node scripts/probe.js https://example.com/          # 가격이 HTML 에 있는지부터 확인
+node scripts/dump.js https://example.com/ "22,300"  # 있으면 그 주변 마크업을 본다
+node scripts/analyze.js data/probe/<저장된파일>.html  # 반복 단위·고유 ID 확정
+```
+
+가격이 안 나오면 그 사이트는 CSR 이다. 정적 파서로는 안 되니 접어야 한다.
 
 ## 새 수집 소스 추가하기
 
@@ -209,6 +267,11 @@ tests/                      db · normalize · collector 테스트 34개
 
 ## 알려진 한계
 
+- **수집 가능한 소스가 사실상 jejussok 하나이고, 그마저 6건 남짓이다.**
+  실데이터의 주력은 관리자 직접 등록이 될 수밖에 없다.
+  규모를 키우려면 (a) 업체 제휴로 데이터를 직접 받거나,
+  (b) CSR 사이트의 내부 JSON 엔드포인트를 역추적하거나,
+  (c) Playwright 를 별도 서비스로 붙여야 한다.
 - 요금이 `1일 단가 × 일수` 단순 계산이다. 실제 렌터카는 기간·시즌별 요율표가 따로 있다.
 - 재고는 신청 건수로만 셈한다. 업체 실시간 재고와 연동되지 않는다.
 - 성수기/비수기 가격 차등이 딜 단위로만 표현된다.

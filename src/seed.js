@@ -53,7 +53,8 @@ const VENDORS = [
   { name: '제주원렌터카',   pickup_type: 'airport_shuttle', rating: 4.1, reviews:  610, tier: '로컬' },
   { name: '무지개렌트카',   pickup_type: 'airport_shuttle', rating: 4.2, reviews:  430, tier: '로컬' },
   { name: '제주에코렌트카', pickup_type: 'airport_shuttle', rating: 4.4, reviews:  380, tier: '로컬' },
-  { name: '제주속으로',     pickup_type: 'airport_shuttle', rating: 4.0, reviews:  290, tier: '로컬' },
+  // '제주속으로'는 여기 두지 않는다 — jejussok 어댑터가 실제 매물을 수집하는 업체라,
+  // 같은 이름으로 가짜 시드를 만들면 실데이터와 섞여 구분이 불가능해진다.
 ];
 
 // [차종, 등급, 연료, 인승, 비수기 정가 하한, 상한]

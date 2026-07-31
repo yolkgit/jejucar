@@ -290,7 +290,11 @@ function dealCard(d) {
         <div class="grow">
           <div class="row-title">${esc(d.carModel)} <span style="font-weight:600;color:var(--text-3);font-size:12px">${esc(d.carClass)}</span></div>
           <div class="row-sub">
-            ${esc(d.vendor)} · <s>${won(d.listPrice)}</s> <b>${won(d.salePrice)}원</b> (${d.discountPct}%)
+            ${esc(d.vendor)} · ${d.listPrice ? `<s>${won(d.listPrice)}</s> ` : ''}<b>${won(d.salePrice)}원</b>${
+              d.discountPct !== null && d.discountPct !== undefined
+                ? ` (${d.discountPct}%)`
+                : ' <span style="color:var(--text-3)">정가 미표기</span>'
+            }
             ${d.capWarning ? ' · <b style="color:var(--amber)">상한 초과</b>' : ''}<br>
             ${esc(d.validFrom) || '-'} ~ ${esc(d.validTo) || '-'} · ${esc(d.sourceName)}
           </div>

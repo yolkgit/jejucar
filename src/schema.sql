@@ -59,10 +59,15 @@ CREATE TABLE IF NOT EXISTS deals (
   transmission  TEXT    NOT NULL DEFAULT '자동',
 
   -- 금액은 원 단위 정수. 부동소수점 쓰지 않는다.
-  list_price    INTEGER NOT NULL CHECK (list_price  > 0),   -- 24시간 정가
-  sale_price    INTEGER NOT NULL CHECK (sale_price  > 0),   -- 24시간 할인가
-  -- 할인율은 파생값이지만 정렬·인덱싱을 위해 저장한다. 쓰기 시점에 계산.
-  discount_pct  INTEGER NOT NULL CHECK (discount_pct BETWEEN 0 AND 99),
+  --
+  -- list_price(정가)는 NULL 을 허용한다. 정가를 아예 공개하지 않는 소스가 있다.
+  -- 그런 곳에서 굳이 정가를 만들어 내면(예: 페이지에 주석 처리된 값을 끌어다 쓰기)
+  -- 실제보다 큰 할인율이 표시되는데, 그게 바로 제주도 규칙과 표시광고법이 겨냥하는 것이다.
+  -- 정가를 모르면 모른다고 두고 할인율을 표시하지 않는다.
+  list_price    INTEGER CHECK (list_price IS NULL OR list_price > 0),
+  sale_price    INTEGER NOT NULL CHECK (sale_price > 0),
+  -- 파생값이지만 정렬·인덱싱을 위해 저장한다. 정가가 없으면 NULL.
+  discount_pct  INTEGER CHECK (discount_pct IS NULL OR discount_pct BETWEEN 0 AND 99),
 
   deal_type     TEXT,                      -- '얼리버드' | '타임세일' | '초특가' | '마감임박' | '장기할인'
   insurance     TEXT,                      -- '완전자차' | '일반자차' | '책임보험'
@@ -88,7 +93,7 @@ CREATE TABLE IF NOT EXISTS deals (
   first_seen_at TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
   last_seen_at  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
 
-  CHECK (sale_price <= list_price),
+  CHECK (list_price IS NULL OR sale_price <= list_price),
   CHECK (valid_to IS NULL OR valid_from IS NULL OR valid_to >= valid_from),
   UNIQUE (source_id, external_id)
 );

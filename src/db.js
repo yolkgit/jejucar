@@ -34,6 +34,41 @@ function ensureColumn(table, column, ddl) {
 // 개인정보 수집·이용 동의 시각. 개인정보보호법 제15조상 동의 사실을 남겨야 한다.
 ensureColumn('bookings', 'privacy_agreed_at', 'TEXT');
 
+/**
+ * deals.list_price / discount_pct 를 NOT NULL 에서 NULL 허용으로 바꾼다.
+ * SQLite 는 컬럼 제약을 ALTER 로 못 바꾸므로 테이블을 다시 만들어야 한다.
+ * 이미 NULL 허용이면 아무것도 하지 않는다.
+ */
+function migrateNullableListPrice() {
+  const cols = db.prepare('PRAGMA table_info(deals)').all();
+  const listCol = cols.find((c) => c.name === 'list_price');
+  if (!listCol || listCol.notnull === 0) return false;
+
+  const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+  // 새 정의만 뽑아 임시 테이블을 만들고 데이터를 옮긴 뒤 갈아끼운다.
+  const createDeals = schemaSql
+    .match(/CREATE TABLE IF NOT EXISTS deals \([\s\S]*?\n\);/)?.[0]
+    ?.replace('IF NOT EXISTS deals', 'deals_new');
+  if (!createDeals) throw new Error('schema.sql 에서 deals 정의를 찾지 못했습니다');
+
+  const names = cols.map((c) => c.name).join(', ');
+
+  db.pragma('foreign_keys = OFF');
+  db.transaction(() => {
+    db.exec(createDeals);
+    db.exec(`INSERT INTO deals_new (${names}) SELECT ${names} FROM deals`);
+    db.exec('DROP TABLE deals');
+    db.exec('ALTER TABLE deals_new RENAME TO deals');
+    // 인덱스는 테이블과 함께 사라지므로 스키마를 다시 적용해 되살린다.
+    db.exec(schemaSql.match(/CREATE INDEX IF NOT EXISTS idx_deals[\s\S]*?;/g).join('\n'));
+  })();
+  db.pragma('foreign_keys = ON');
+
+  console.log('[마이그레이션] deals.list_price 를 NULL 허용으로 변경');
+  return true;
+}
+migrateNullableListPrice();
+
 /** 'YYYY-MM-DD HH:MM:SS' 로컬 시각 문자열. SQLite datetime('now','localtime') 과 형식을 맞춘다. */
 function now() {
   const d = new Date();
@@ -45,11 +80,16 @@ function today() {
   return now().slice(0, 10);
 }
 
-/** 정가·할인가로부터 할인율(내림)을 계산한다. 저장 전 항상 이 함수를 거친다. */
+/**
+ * 정가·할인가로부터 할인율(내림)을 계산한다. 저장 전 항상 이 함수를 거친다.
+ * 정가가 없으면 null — 0 이 아니다. "할인 0%"와 "할인율을 알 수 없음"은 다르고,
+ * 화면에서도 다르게 보여야 한다.
+ */
 function discountPct(listPrice, salePrice) {
+  if (listPrice === null || listPrice === undefined || listPrice === '') return null;
   const list = Number(listPrice);
   const sale = Number(salePrice);
-  if (!Number.isFinite(list) || !Number.isFinite(sale) || list <= 0) return 0;
+  if (!Number.isFinite(list) || !Number.isFinite(sale) || list <= 0) return null;
   if (sale >= list) return 0;
   return Math.min(99, Math.floor(((list - sale) / list) * 100));
 }
@@ -125,7 +165,10 @@ function upsertDeal(deal) {
     fuel: deal.fuel ?? null,
     seats: deal.seats ?? null,
     transmission: deal.transmission ?? '자동',
-    list_price: Math.round(deal.list_price),
+    list_price:
+      deal.list_price === null || deal.list_price === undefined
+        ? null
+        : Math.round(deal.list_price),
     sale_price: Math.round(deal.sale_price),
     discount_pct: discountPct(deal.list_price, deal.sale_price),
     deal_type: deal.deal_type ?? null,

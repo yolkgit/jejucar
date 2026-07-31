@@ -230,6 +230,8 @@ a { color: var(--teal); }
 .deal-list-price {
   font-size: 12.5px; color: var(--text-3); text-decoration: line-through;
 }
+/* 정가를 공개하지 않는 업체. 취소선을 빼서 '지워진 가격'으로 오인되지 않게 한다. */
+.deal-list-price.no-list { text-decoration: none; font-size: 11px; opacity: .75; }
 .deal-sale-price {
   font-size: 20px; font-weight: 900; letter-spacing: -0.6px; color: var(--text);
   white-space: nowrap;
