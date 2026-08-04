@@ -44,17 +44,16 @@ const VENDORS = [
   { name: 'SK렌터카',       pickup_type: 'office',          rating: 4.4, reviews: 2480, tier: '대기업' },
   { name: '빌리카',         pickup_type: 'airport_shuttle', rating: 4.2, reviews: 1640, tier: '대기업' },
   { name: '제주렌트카',     pickup_type: 'airport_shuttle', rating: 4.3, reviews: 2010, tier: '로컬대형' },
-  { name: '제주공항렌트카', pickup_type: 'airport_shuttle', rating: 4.1, reviews: 1180, tier: '로컬' },
-  { name: '제주로렌트카',   pickup_type: 'airport_shuttle', rating: 4.6, reviews: 1890, tier: '로컬대형' },
-  { name: '제주OK렌터카',   pickup_type: 'airport_shuttle', rating: 4.2, reviews:  970, tier: '로컬' },
   { name: '제주엔젤카',     pickup_type: 'airport_shuttle', rating: 4.7, reviews: 1420, tier: '로컬' },
   { name: '제주유레카',     pickup_type: 'airport_shuttle', rating: 4.3, reviews:  760, tier: '로컬' },
   { name: '해피렌트카',     pickup_type: 'airport_shuttle', rating: 4.0, reviews:  540, tier: '로컬' },
   { name: '제주원렌터카',   pickup_type: 'airport_shuttle', rating: 4.1, reviews:  610, tier: '로컬' },
-  { name: '무지개렌트카',   pickup_type: 'airport_shuttle', rating: 4.2, reviews:  430, tier: '로컬' },
   { name: '제주에코렌트카', pickup_type: 'airport_shuttle', rating: 4.4, reviews:  380, tier: '로컬' },
-  // '제주속으로'는 여기 두지 않는다 — jejussok 어댑터가 실제 매물을 수집하는 업체라,
-  // 같은 이름으로 가짜 시드를 만들면 실데이터와 섞여 구분이 불가능해진다.
+  // 아래 업체들은 여기 두지 않는다 — 실제 수집 어댑터가 이들의 매물을 가져오는데,
+  // 시드가 같은 이름으로 vendors 행을 먼저 만들면 **실제 딜에 가짜 평점이 붙는다**.
+  // (ensureVendor 는 기존 행을 덮어쓰지 않으므로 먼저 만든 쪽이 이긴다)
+  //   제주속으로  → jejussok 어댑터
+  //   제주OK렌터카 · 무지개렌트카 · 제주공항렌트카 · 제주로렌트카 → dolharupang 어댑터
 ];
 
 // [차종, 등급, 연료, 인승, 비수기 정가 하한, 상한]
@@ -163,7 +162,26 @@ function buildNotes({ insurance, insuranceIncluded, dealType, minDays, vendor })
   return parts.join(' · ');
 }
 
+/** 시드 딜과, 시드가 만들었지만 아무도 안 쓰는 업체 행을 지운다. */
+function clearSeed() {
+  const source = db.prepare("SELECT id FROM sources WHERE key = 'seed'").get();
+  if (!source) {
+    console.log('시드 소스가 없습니다.');
+    return;
+  }
+  const removed = db.prepare('DELETE FROM deals WHERE source_id = ?').run(source.id).changes;
+  // 딜이 하나도 없는 업체는 남겨 둘 이유가 없다.
+  const orphans = db
+    .prepare('DELETE FROM vendors WHERE id NOT IN (SELECT DISTINCT vendor_id FROM deals WHERE vendor_id IS NOT NULL)')
+    .run().changes;
+  console.log(`시드 딜 ${removed}건 삭제, 참조 없는 업체 ${orphans}곳 정리`);
+}
+
 function main() {
+  if (process.argv[2] === 'clear') {
+    clearSeed();
+    return;
+  }
   const keep = process.argv[2] === 'keep';
   const source = ensureSource({
     key: 'seed',
@@ -226,4 +244,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { buildDeals, VENDORS, CARS, makeRng };
+module.exports = { buildDeals, clearSeed, VENDORS, CARS, makeRng };

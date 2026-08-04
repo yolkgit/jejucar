@@ -1,0 +1,1299 @@
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "packageGroupId": "pkg_grp_6916a8c4bedd3",
+        "name": "더 뉴 모닝 2026 - 휘발유",
+        "type": "경차",
+        "fuelType": "휘발유",
+        "capacity": 5,
+        "golfBagCapacity": 0,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2025/12/20/0577834f-c122-4af5-9381-e6c43d71ac12.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "자유렌트카",
+            "publicId": "TC0054",
+            "companyName": "자유렌트카",
+            "productDetailId": "prdt_006916a8f8666b6",
+            "availableQuantity": 1,
+            "modelYear": "2025",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 20200,
+              "originalPrice": 120000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 2,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          },
+          {
+            "companyId": "제주OK렌터카",
+            "publicId": "TC0015",
+            "companyName": "제주OK렌터카",
+            "productDetailId": "prdt_0069e43a496559d",
+            "availableQuantity": 9,
+            "modelYear": "2026",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "차선이탈방지보조",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "전방추돌방지",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "통풍시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "낚시용품",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "반려동물",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 22300,
+              "originalPrice": 130000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 21,
+              "minimumCareer": 1
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "packageGroupId": "pkg_grp_63c8f955debc4",
+        "name": "2세대 더 뉴 K3 2023 (만 26세) - 휘발유",
+        "type": "소형∙준중형",
+        "fuelType": "휘발유",
+        "capacity": 5,
+        "golfBagCapacity": 1,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2026/01/13/8104da68-8c12-4f16-869e-94b3ff21b6ec.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "자유렌트카",
+            "publicId": "TC0054",
+            "companyName": "자유렌트카",
+            "productDetailId": "prdt_0068cb43bbd3c45",
+            "availableQuantity": 1,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "차선이탈방지보조",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "반려동물",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 20200,
+              "originalPrice": 160000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 2,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          },
+          {
+            "companyId": "예스렌트카",
+            "publicId": "TC0021",
+            "companyName": "패밀리렌트카",
+            "productDetailId": "prdt_00677b34603c15f",
+            "availableQuantity": 8,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 33600,
+              "originalPrice": 160000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 1
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "packageGroupId": "pkg_grp_63b2988cec26b",
+        "name": "3세대 K5 2023 - LPG",
+        "type": "중형",
+        "fuelType": "LPG",
+        "capacity": 5,
+        "golfBagCapacity": 1,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2026/01/17/7e503549-c99b-427c-9bad-6c5d9e75634e.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "조아렌트카",
+            "publicId": "TC0039",
+            "companyName": "조아렌트카",
+            "productDetailId": "prdt_0064b8c5e079a85",
+            "availableQuantity": 1,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "공기청정시스템",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후측방경고등",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "차선이탈방지보조",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "전방추돌방지",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": false,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 17700,
+              "originalPrice": 180000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 1
+            }
+          },
+          {
+            "companyId": "무지개렌트카",
+            "publicId": "TC0004",
+            "companyName": "무지개렌트카",
+            "productDetailId": "prdt_00668cde94169ea",
+            "availableQuantity": 9,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "차선이탈방지보조",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "통풍시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 38700,
+              "originalPrice": 185000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 1,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "packageGroupId": "pkg_grp_6385bfbe8fbe8",
+        "name": "디 올 뉴 그랜저 GN7 2023 - 휘발유",
+        "type": "대형",
+        "fuelType": "휘발유",
+        "capacity": 5,
+        "golfBagCapacity": 2,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2026/01/23/eab0ce11-543a-4545-bdd7-6f1e46eb2d17.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "제주현대렌트카",
+            "publicId": "TC0092",
+            "companyName": "제주현대렌트카",
+            "productDetailId": "prdt_0063b7988da876f",
+            "availableQuantity": 3,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "차선이탈방지보조",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "전방추돌방지",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "통풍시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "반려동물",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 31600,
+              "originalPrice": 230000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 1
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          },
+          {
+            "companyId": "한라렌트카",
+            "publicId": "TC0073",
+            "companyName": "제주한라렌트카",
+            "productDetailId": "prdt_0063993b2dafe24",
+            "availableQuantity": 8,
+            "modelYear": "2022 ~ 23",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "통풍시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "썬루프",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "반려동물",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 40000,
+              "originalPrice": 250000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 1,
+              "maximumAge": 70
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "packageGroupId": "pkg_grp_649e2e69c8d17",
+        "name": "베뉴 2023 - 휘발유",
+        "type": "RV∙SUV",
+        "fuelType": "휘발유",
+        "capacity": 5,
+        "golfBagCapacity": 0,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2026/01/12/5afa17c3-de56-4703-a867-e434a845d984.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "제주현대렌트카",
+            "publicId": "TC0092",
+            "companyName": "제주현대렌트카",
+            "productDetailId": "prdt_00653b11c915fba",
+            "availableQuantity": 2,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "차선이탈방지보조",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "전방추돌방지",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "통풍시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "썬루프",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "반려동물",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 17800,
+              "originalPrice": 137000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 1
+            }
+          },
+          {
+            "companyId": "자유렌트카",
+            "publicId": "TC0054",
+            "companyName": "자유렌트카",
+            "productDetailId": "prdt_0068cb4554a3ba1",
+            "availableQuantity": 1,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "반려동물",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 19800,
+              "originalPrice": 180000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 2,
+              "maximumAge": 69
+            }
+          }
+        ]
+      },
+      {
+        "packageGroupId": "pkg_grp_5ff567ba0c1f2",
+        "name": "4세대 카니발 11인 2021 - 경유",
+        "type": "승합",
+        "fuelType": "경유",
+        "capacity": 11,
+        "golfBagCapacity": 2,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2026/01/14/4aaa49c2-d2e5-41e3-b2cd-333a04ee127d.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "자유렌트카",
+            "publicId": "TC0054",
+            "companyName": "자유렌트카",
+            "productDetailId": "prdt_0060238444740a1",
+            "availableQuantity": 1,
+            "modelYear": "2021",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "반려동물",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 30100,
+              "originalPrice": 270000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 2,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          },
+          {
+            "companyId": "무지개렌트카",
+            "publicId": "TC0004",
+            "companyName": "무지개렌트카",
+            "productDetailId": "prdt_00668cd4b69772b",
+            "availableQuantity": 6,
+            "modelYear": "2021",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블랙박스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "네비게이션",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 123800,
+              "originalPrice": 270000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 1,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "packageGroupId": "pkg_grp_63f80ae6e153b",
+        "name": "폭스바겐 티구안 2023 - 경유",
+        "type": "외제",
+        "fuelType": "경유",
+        "capacity": 5,
+        "golfBagCapacity": 1,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2025/12/17/cc182d0c-eea5-41c2-afd0-876ba4e62253.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "자유렌트카",
+            "publicId": "TC0054",
+            "companyName": "자유렌트카",
+            "productDetailId": "prdt_0063f80c404707d",
+            "availableQuantity": 1,
+            "modelYear": "2023",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "썬루프",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 32100,
+              "originalPrice": 290000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 3,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "packageGroupId": "pkg_test_broken",
+        "name": "테스트 결측 상품",
+        "type": "경차",
+        "fuelType": "휘발유",
+        "capacity": 5,
+        "golfBagCapacity": 0,
+        "imageUrl": "https://img.dolharupang.com/car/goods/2025/12/20/0577834f-c122-4af5-9381-e6c43d71ac12.webp",
+        "isFavorite": false,
+        "offers": [
+          {
+            "companyId": "자유렌트카",
+            "publicId": "TC0054",
+            "companyName": "자유렌트카",
+            "productDetailId": "prdt_no_price",
+            "availableQuantity": 1,
+            "modelYear": "2025",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {},
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 2,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          },
+          {
+            "companyId": "자유렌트카",
+            "publicId": "TC0054",
+            "companyName": "자유렌트카",
+            "productDetailId": null,
+            "availableQuantity": 1,
+            "modelYear": "2025",
+            "options": [
+              {
+                "optionId": "",
+                "value": "금연",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방카메라",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "후방센서",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "에어백",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "블루투스",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선핸들",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "열선시트",
+                "isExist": true
+              },
+              {
+                "optionId": "",
+                "value": "스마트키",
+                "isExist": true
+              }
+            ],
+            "youtubeLink": true,
+            "rewardLimited": 0,
+            "pricing": {
+              "salePrice": 20200,
+              "originalPrice": 120000
+            },
+            "insurance": "none",
+            "eligibility": {
+              "minimumAge": 26,
+              "minimumCareer": 2,
+              "maximumAge": 69
+            },
+            "coupons": [
+              {
+                "couponName": "첫만남 쿠폰",
+                "couponId": "coupon_67ea1e6b54a04",
+                "couponDiscount": 2000
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

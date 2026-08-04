@@ -269,8 +269,32 @@ async function collectAll({ log = consoleLog, onlyKey = null } = {}) {
   return { summary, expiredByDate, adapterProblems: problems };
 }
 
-/** 주기 실행. COLLECT_INTERVAL_MIN=0 이면 끈다. */
-function startScheduler({ log = consoleLog } = {}) {
+/**
+ * 마지막으로 성공한 수집 이후 몇 분이 지났는지.
+ * 활성 수집 소스가 없으면 null.
+ */
+function minutesSinceLastCollect() {
+  const row = db
+    .prepare(
+      `SELECT MAX(last_ok_at) AS at FROM sources
+        WHERE enabled = 1 AND kind IN ('crawler', 'api')`
+    )
+    .get();
+  if (!row || !row.at) return Infinity; // 한 번도 성공한 적 없음
+  const last = new Date(row.at.replace(' ', 'T')).getTime();
+  if (!Number.isFinite(last)) return Infinity;
+  return (Date.now() - last) / 60000;
+}
+
+/**
+ * 주기 실행. COLLECT_INTERVAL_MIN=0 이면 끈다.
+ *
+ * setInterval 만 걸면 첫 실행이 한 주기(기본 3시간) 뒤라, 컨테이너를 새로 띄운
+ * 직후에는 화면이 비어 있게 된다. 그래서 시작 직후에도 한 번 돌린다.
+ * 다만 재시작을 반복해도 매번 상대 서버를 때리지 않도록,
+ * 직전 성공이 한 주기 안이면 건너뛴다.
+ */
+function startScheduler({ log = consoleLog, startupDelayMs = 15000 } = {}) {
   const minutes = Number(process.env.COLLECT_INTERVAL_MIN ?? 180);
   if (!Number.isFinite(minutes) || minutes <= 0) {
     log.info('자동 수집 비활성 (COLLECT_INTERVAL_MIN=0)');
@@ -278,7 +302,7 @@ function startScheduler({ log = consoleLog } = {}) {
   }
 
   let running = false;
-  const tick = async () => {
+  const tick = async (reason) => {
     // 이전 실행이 아직 안 끝났으면 건너뛴다. 겹쳐 돌면 상대 서버를 두 배로 때린다.
     if (running) {
       log.warn('이전 수집이 진행 중 — 이번 주기 건너뜀');
@@ -286,17 +310,30 @@ function startScheduler({ log = consoleLog } = {}) {
     }
     running = true;
     try {
+      log.info(`수집 시작 (${reason})`);
       await collectAll({ log });
     } catch (err) {
-      log.error(`수집 주기 실패: ${err.message}`);
+      log.error(`수집 실패: ${err.message}`);
     } finally {
       running = false;
     }
   };
 
   log.info(`자동 수집 ${minutes}분 주기로 예약`);
-  const timer = setInterval(tick, minutes * 60 * 1000);
+  const timer = setInterval(() => tick('정기'), minutes * 60 * 1000);
   timer.unref?.();
+
+  // 서버가 요청을 받기 시작한 뒤에 돌도록 조금 늦춘다.
+  const startupTimer = setTimeout(() => {
+    const since = minutesSinceLastCollect();
+    if (since < minutes) {
+      log.info(`직전 수집이 ${Math.round(since)}분 전 — 시작 시 수집 건너뜀`);
+      return;
+    }
+    tick('시작 직후 보충');
+  }, startupDelayMs);
+  startupTimer.unref?.();
+
   return timer;
 }
 

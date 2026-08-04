@@ -56,7 +56,38 @@ docker compose up -d --build     # 호스트 3008 → 컨테이너 3000
 | happyrent.co.kr | **404 — robots.txt 없음** | 규칙 없음 = 허용 |
 | jejuokrent.co.kr | **TLS 인증서 오류로 확인 불가** | |
 
-### 2. 진짜 문제는 robots.txt 가 아니라 CSR 이다
+### 2. CSR 사이트도 내부 JSON API 는 호출된다 — 주력 수집원
+
+**돌하루팡(dolharupang.com)** 은 Next.js CSR 이라 HTML 에 가격이 없다.
+하지만 화면을 그리려고 내부 REST API 를 부르고, 그 엔드포인트는 브라우저 없이도 응답한다.
+
+```
+GET /api/cars?startDate=YYYY-MM-DDTHH:mm:ss&endDate=...
+→ { data: { items: [ { name, type, fuelType, capacity, offers: [
+     { companyName, productDetailId, pricing: { salePrice, originalPrice },
+       eligibility: { minimumAge, minimumCareer }, availableQuantity } ] } ] } }
+```
+
+**요청 한 번에 차종 440여 개 · 업체별 상품 1,200여 건**이 온다. 이게 이 앱의 주력 수집원이다.
+찾는 과정은 `scripts/scan-chunks.js`(같은 호스트 JS 번들을 전부 받아 `/api/` 경로 수집) →
+`scripts/grep-chunks.js`(호출부 맥락에서 파라미터·날짜 형식 확정) 순서였다.
+
+#### originalPrice 를 그대로 정가로 쓰면 안 된다
+
+`originalPrice` 는 업체가 **신고한** 1일 요금이고, `salePrice` 가 조회 날짜의 실제 판매가다.
+실측 결과 **35% 의 상품에서 salePrice 가 originalPrice 보다 높다**(성수기 할증).
+
+| 같은 차(3세대 K5 2023) | 신고 요금 | 판매가 | |
+|---|---|---|---|
+| 조아렌트카 | 180,000 | 17,700 | **-90%** |
+| 무지개렌트카 | 185,000 | 38,700 | -79% |
+| SEEU렌트카 | 200,000 | 207,400 | **+3.7% 할증** |
+
+그래서 어댑터는 `salePrice < originalPrice` 일 때만 정가로 인정하고,
+할증인 경우 정가를 비워 둔 뒤 할증률을 `notes` 에 적는다.
+할증을 정가로 세워 두면 화면에 "할인"으로 보인다.
+
+### 3. 정적 HTML 로 가격이 나오는 곳은 하나뿐이다
 
 가격이 정적 HTML에 들어 있는 사이트는 **jejussok.com 하나뿐**이다.
 carmore·dolharupang·jejupass·jarrent·jejuonecar 등은 전부 CSR이라

@@ -52,6 +52,10 @@ const CLASS_ALIASES = {
   '소형suv': 'SUV',
   '중형suv': 'SUV',
   '대형suv': 'SUV',
+  // 돌하루팡은 'RV∙SUV', '소형∙준중형', '외제' 같은 묶음 표기를 쓴다.
+  rvsuv: 'SUV',
+  rv: 'SUV',
+  '소형준중형': '준중형',
   승합: '승합',
   승합차: '승합',
   '9인승': '승합',
@@ -59,6 +63,7 @@ const CLASS_ALIASES = {
   수입: '수입',
   수입차: '수입',
   외제: '수입',
+  외제차: '수입',
   전기: '전기',
   전기차: '전기',
   ev: '전기',
@@ -76,11 +81,15 @@ const MODEL_INDEX = (() => {
   return entries;
 })();
 
-/** 공백·특수문자를 정리한 비교용 키 */
+/**
+ * 공백·특수문자를 정리한 비교용 키.
+ * 소스마다 'RV∙SUV'(U+2219), '소형·준중형'(U+00B7) 처럼 다른 구분 기호를 쓰므로
+ * 가운뎃점 계열을 모두 제거해 하나로 모은다.
+ */
 function compactKey(text) {
   return String(text ?? '')
     .toLowerCase()
-    .replace(/[\s\-_.·()[\]/]+/g, '');
+    .replace(/[\s\-_.·∙•・/()[\]]+/g, '');
 }
 
 function cleanText(text) {
