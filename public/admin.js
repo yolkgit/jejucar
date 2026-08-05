@@ -38,9 +38,56 @@ function toast(msg, kind = '') {
   setTimeout(() => el.remove(), 3600);
 }
 
-const STATUS_LABEL = { pending: '확인 대기', confirmed: '확정', cancelled: '취소', rejected: '반려' };
+let currentTab = 'clicks';
 
-let currentTab = 'bookings';
+// ── 송출 클릭 ─────────────────────────────────────────────
+async function renderClicks(host) {
+  const { top, bySource, daily } = await api('/api/admin/clicks?limit=40');
+
+  const totalRecent = daily.reduce((n, d) => n + d.clicks, 0);
+  const maxDay = Math.max(1, ...daily.map((d) => d.clicks));
+
+  host.innerHTML = `
+    <div class="notice info" style="margin-bottom:12px">
+      <span class="icon">i</span>
+      <span>이 앱은 예약을 받지 않습니다. 특가를 찾아 <strong>원 사이트 상품 페이지로 보내는 것</strong>이 전부이며,
+      아래 송출 건수가 유일한 성과 지표입니다. 개인정보(IP·브라우저 정보)는 저장하지 않습니다.</span>
+    </div>
+
+    <div class="section-title">최근 14일 (${won(totalRecent)}건)</div>
+    ${daily.length === 0 ? '<div class="row-sub">아직 송출 기록이 없습니다.</div>' : ''}
+    ${daily
+      .map(
+        (d) => `<div class="log-line" style="display:flex;align-items:center;gap:8px">
+          <span style="width:88px">${esc(d.day)}</span>
+          <span style="flex:1;background:var(--surface-2);border-radius:3px;height:14px;position:relative">
+            <span style="position:absolute;inset:0 auto 0 0;width:${Math.round((d.clicks / maxDay) * 100)}%;background:var(--accent);border-radius:3px"></span>
+          </span>
+          <strong style="width:48px;text-align:right">${won(d.clicks)}</strong>
+        </div>`
+      )
+      .join('')}
+
+    <div class="section-title">소스별 (30일)</div>
+    ${bySource.length === 0 ? '<div class="row-sub">-</div>' : ''}
+    ${bySource.map((s) => `<div class="log-line">${esc(s.source_key || '알 수 없음')} · <strong>${won(s.clicks)}</strong>건</div>`).join('')}
+
+    <div class="section-title">많이 나간 상품 (30일)</div>
+    ${top.length === 0 ? '<div class="row-sub">-</div>' : ''}
+    ${top
+      .map(
+        (t) => `<div class="row-card">
+          <div class="row-head">
+            <div class="grow">
+              <div class="row-title">${esc(t.car_model)}</div>
+              <div class="row-sub">${esc(t.vendor_name)} · ${esc(t.source_key || '-')} · 최근 ${esc(t.last_at)}</div>
+            </div>
+            <span class="status-pill confirmed">${won(t.clicks)}회</span>
+          </div>
+        </div>`
+      )
+      .join('')}`;
+}
 
 // ── 인증 ──────────────────────────────────────────────────
 async function boot() {
@@ -92,9 +139,9 @@ async function loadStats() {
   const s = await api('/api/admin/stats');
   $('#stats').innerHTML = `
     <div class="stat"><div class="label">활성 딜</div><div class="value">${won(s.deals.active)}</div></div>
-    <div class="stat ${s.bookings.pending ? 'warn' : ''}"><div class="label">확인 대기</div><div class="value">${won(s.bookings.pending)}</div></div>
-    <div class="stat"><div class="label">확정</div><div class="value">${won(s.bookings.confirmed)}</div></div>
-    <div class="stat"><div class="label">최근 7일 신청</div><div class="value">${won(s.recentBookings7d)}</div></div>`;
+    <div class="stat"><div class="label">송출 (오늘)</div><div class="value">${won(s.clicks.d1)}</div></div>
+    <div class="stat"><div class="label">송출 (7일)</div><div class="value">${won(s.clicks.d7)}</div></div>
+    <div class="stat ${s.noLink ? 'warn' : ''}"><div class="label">링크 없는 딜</div><div class="value">${won(s.noLink)}</div></div>`;
 }
 
 // ── 탭 ────────────────────────────────────────────────────
@@ -110,121 +157,12 @@ async function renderTab() {
   const host = $('#tabBody');
   host.innerHTML = '<div class="skeleton"></div>';
   try {
-    if (currentTab === 'bookings') await renderBookings(host);
+    if (currentTab === 'clicks') await renderClicks(host);
     else if (currentTab === 'deals') await renderDeals(host);
     else await renderSources(host);
   } catch (err) {
     host.innerHTML = `<div class="notice error"><span class="icon">!</span><span>${esc(err.message)}</span></div>`;
   }
-}
-
-// ── 예약 ──────────────────────────────────────────────────
-let bookingFilter = '';
-
-async function renderBookings(host) {
-  const qs = bookingFilter ? `?status=${bookingFilter}` : '';
-  const { bookings } = await api(`/api/admin/bookings${qs}`);
-
-  const filters = ['', 'pending', 'confirmed', 'cancelled', 'rejected'];
-  const chips = filters
-    .map((f) => `<button class="chip" data-f="${f}" aria-pressed="${bookingFilter === f}">${f ? STATUS_LABEL[f] : '전체'}</button>`)
-    .join('');
-
-  host.innerHTML = `
-    <nav class="chips">${chips}</nav>
-    ${bookings.length === 0 ? '<div class="empty"><div class="msg">해당 예약이 없습니다</div></div>' : ''}
-    ${bookings.map(bookingCard).join('')}`;
-
-  $$('[data-f]', host).forEach((b) =>
-    b.addEventListener('click', () => {
-      bookingFilter = b.dataset.f;
-      renderTab();
-    })
-  );
-
-  $$('[data-act]', host).forEach((b) =>
-    b.addEventListener('click', async () => {
-      const { code, act } = b.dataset;
-      if (act === 'cancelled' && !confirm('이 예약을 취소 처리할까요?')) return;
-      if (act === 'rejected' && !confirm('이 예약을 반려할까요?')) return;
-      b.disabled = true;
-      try {
-        await api(`/api/admin/bookings/${encodeURIComponent(code)}`, { method: 'PATCH', body: { status: act } });
-        toast('상태를 변경했습니다.');
-        await loadStats();
-        await renderTab();
-      } catch (err) {
-        toast(err.message, 'error');
-        b.disabled = false;
-      }
-    })
-  );
-
-  $$('[data-memo]', host).forEach((b) =>
-    b.addEventListener('click', async () => {
-      const code = b.dataset.memo;
-      const cur = b.dataset.cur || '';
-      const memo = prompt('신청자에게 보일 안내 메모', cur);
-      if (memo === null) return;
-      try {
-        await api(`/api/admin/bookings/${encodeURIComponent(code)}`, { method: 'PATCH', body: { adminMemo: memo } });
-        toast('메모를 저장했습니다.');
-        await renderTab();
-      } catch (err) {
-        toast(err.message, 'error');
-      }
-    })
-  );
-
-  $$('[data-detail]', host).forEach((b) =>
-    b.addEventListener('click', async () => {
-      try {
-        const { booking } = await api(`/api/admin/bookings/${encodeURIComponent(b.dataset.detail)}`);
-        alert(
-          `예약번호: ${booking.code}\n` +
-          `신청자: ${booking.name}\n` +
-          `연락처: ${booking.phone}\n` +
-          `이메일: ${booking.email || '-'}\n` +
-          `나이/면허: ${booking.driver_age ?? '-'}세 / ${booking.license_years ?? '-'}년\n` +
-          `요청사항: ${booking.memo || '-'}\n` +
-          `동의 시각: ${booking.privacy_agreed_at || '-'}`
-        );
-      } catch (err) {
-        toast(err.message, 'error');
-      }
-    })
-  );
-}
-
-function bookingCard(b) {
-  const acts = [];
-  if (b.status === 'pending') {
-    acts.push(`<button class="mini-btn good" data-act="confirmed" data-code="${esc(b.code)}">확정</button>`);
-    acts.push(`<button class="mini-btn bad" data-act="rejected" data-code="${esc(b.code)}">반려</button>`);
-  }
-  if (b.status === 'pending' || b.status === 'confirmed') {
-    acts.push(`<button class="mini-btn" data-act="cancelled" data-code="${esc(b.code)}">취소</button>`);
-  }
-  acts.push(`<button class="mini-btn" data-detail="${esc(b.code)}">연락처 보기</button>`);
-  acts.push(`<button class="mini-btn" data-memo="${esc(b.code)}" data-cur="${esc(b.adminMemo || '')}">메모</button>`);
-
-  return `
-    <div class="row-card">
-      <div class="row-head">
-        <div class="grow">
-          <div class="row-title">${esc(b.car || '차량 정보 없음')}</div>
-          <div class="row-sub">
-            <span class="mono">${esc(b.code)}</span> · ${esc(b.name)} · ${esc(b.phoneMasked)}<br>
-            ${esc(b.pickupAt)} → ${esc(b.returnAt)} (${b.days}일) · ${won(b.quotedPrice)}원<br>
-            ${esc(b.pickupPlace) || '-'} · 신청 ${esc(b.createdAt)}
-            ${b.memo ? `<br>요청: ${esc(b.memo)}` : ''}
-            ${b.adminMemo ? `<br>메모: ${esc(b.adminMemo)}` : ''}
-          </div>
-        </div>
-        <span class="status-pill ${esc(b.status)}">${esc(STATUS_LABEL[b.status] || b.status)}</span>
-      </div>
-      <div class="row-actions">${acts.join('')}</div>
-    </div>`;
 }
 
 // ── 딜 ────────────────────────────────────────────────────

@@ -10,7 +10,7 @@
 
 const express = require('express');
 const { db, now, ensureVendor, upsertDeal, discountPct } = require('../db');
-const { safeEqual, sessionToken, maskPhone } = require('../lib/code');
+const { safeEqual, sessionToken } = require('../lib/code');
 const { RateLimiter, middleware, clientKey } = require('../lib/ratelimit');
 const { ADMIN_PASSWORD, CAR_CLASSES } = require('../config');
 const { toDeal, SELECT_BASE } = require('./deals');
@@ -105,97 +105,57 @@ router.get('/admin/stats', (req, res) => {
     )
     .get();
 
-  const bookings = db
+  const clicks = db
     .prepare(
       `SELECT COUNT(*) AS total,
-              SUM(CASE WHEN status = 'pending'   THEN 1 ELSE 0 END) AS pending,
-              SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
-              SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled,
-              SUM(CASE WHEN status = 'rejected'  THEN 1 ELSE 0 END) AS rejected
-         FROM bookings`
+              SUM(CASE WHEN clicked_at >= datetime('now','localtime','-1 day')  THEN 1 ELSE 0 END) AS d1,
+              SUM(CASE WHEN clicked_at >= datetime('now','localtime','-7 days') THEN 1 ELSE 0 END) AS d7
+         FROM outbound_clicks`
     )
     .get();
 
-  const recent = db
-    .prepare("SELECT COUNT(*) AS c FROM bookings WHERE created_at >= datetime('now', 'localtime', '-7 days')")
+  // 링크가 없는 딜은 이 앱에서 아무 쓸모가 없다. 눈에 띄게 보여준다.
+  const noLink = db
+    .prepare("SELECT COUNT(*) AS c FROM deals WHERE status='active' AND (detail_url IS NULL OR detail_url='')")
     .get().c;
 
-  res.json({ deals, bookings, recentBookings7d: recent });
+  res.json({ deals, clicks, noLink });
 });
 
-// ── 예약 관리 ───────────────────────────────────────────────
-const BOOKING_STATUSES = ['pending', 'confirmed', 'cancelled', 'rejected'];
+// ── 송출 클릭 ───────────────────────────────────────────────
+router.get('/admin/clicks', (req, res) => {
+  const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 50));
 
-router.get('/admin/bookings', (req, res) => {
-  const status = BOOKING_STATUSES.includes(req.query.status) ? req.query.status : null;
-  const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 100));
+  const top = db
+    .prepare(
+      `SELECT vendor_name, car_model, source_key, COUNT(*) AS clicks, MAX(clicked_at) AS last_at
+         FROM outbound_clicks
+        WHERE clicked_at >= datetime('now','localtime','-30 days')
+        GROUP BY vendor_name, car_model, source_key
+        ORDER BY clicks DESC, last_at DESC
+        LIMIT ?`
+    )
+    .all(limit);
 
-  const rows = status
-    ? db.prepare('SELECT * FROM bookings WHERE status = ? ORDER BY created_at DESC LIMIT ?').all(status, limit)
-    : db.prepare('SELECT * FROM bookings ORDER BY created_at DESC LIMIT ?').all(limit);
+  const bySource = db
+    .prepare(
+      `SELECT source_key, COUNT(*) AS clicks
+         FROM outbound_clicks
+        WHERE clicked_at >= datetime('now','localtime','-30 days')
+        GROUP BY source_key ORDER BY clicks DESC`
+    )
+    .all();
 
-  res.json({
-    bookings: rows.map((r) => {
-      let snapshot = null;
-      try {
-        snapshot = JSON.parse(r.snapshot_json);
-      } catch {}
-      return {
-        code: r.code,
-        status: r.status,
-        name: r.name,
-        // 목록에서는 전화번호를 가린다. 필요할 때 상세에서만 원문을 본다.
-        phoneMasked: maskPhone(r.phone),
-        email: r.email,
-        days: r.days,
-        quotedPrice: r.quoted_price,
-        pickupAt: r.pickup_at,
-        returnAt: r.return_at,
-        pickupPlace: r.pickup_place,
-        driverAge: r.driver_age,
-        licenseYears: r.license_years,
-        memo: r.memo,
-        adminMemo: r.admin_memo,
-        createdAt: r.created_at,
-        cancelledBy: r.cancelled_by,
-        car: snapshot ? `${snapshot.vendor} ${snapshot.carModel}` : null,
-      };
-    }),
-  });
-});
+  const daily = db
+    .prepare(
+      `SELECT substr(clicked_at, 1, 10) AS day, COUNT(*) AS clicks
+         FROM outbound_clicks
+        WHERE clicked_at >= datetime('now','localtime','-14 days')
+        GROUP BY day ORDER BY day DESC`
+    )
+    .all();
 
-router.get('/admin/bookings/:code', (req, res) => {
-  const r = db.prepare('SELECT * FROM bookings WHERE code = ?').get(req.params.code);
-  if (!r) return res.status(404).json({ error: '예약을 찾을 수 없습니다.' });
-  let snapshot = null;
-  try {
-    snapshot = JSON.parse(r.snapshot_json);
-  } catch {}
-  // 상세에서는 연락 목적상 전화번호 원문을 준다.
-  res.json({ booking: { ...r, snapshot } });
-});
-
-router.patch('/admin/bookings/:code', (req, res) => {
-  const row = db.prepare('SELECT * FROM bookings WHERE code = ?').get(req.params.code);
-  if (!row) return res.status(404).json({ error: '예약을 찾을 수 없습니다.' });
-
-  const nextStatus = req.body?.status;
-  const adminMemo = typeof req.body?.adminMemo === 'string' ? req.body.adminMemo.slice(0, 1000) : undefined;
-
-  if (nextStatus !== undefined && !BOOKING_STATUSES.includes(nextStatus)) {
-    return res.status(400).json({ error: '허용되지 않는 상태값입니다.' });
-  }
-
-  db.prepare(
-    `UPDATE bookings
-        SET status = COALESCE(?, status),
-            admin_memo = COALESCE(?, admin_memo),
-            cancelled_by = CASE WHEN ? = 'cancelled' THEN 'admin' ELSE cancelled_by END,
-            updated_at = ?
-      WHERE id = ?`
-  ).run(nextStatus ?? null, adminMemo ?? null, nextStatus ?? '', now(), row.id);
-
-  res.json({ ok: true, booking: db.prepare('SELECT * FROM bookings WHERE id = ?').get(row.id) });
+  res.json({ top, bySource, daily });
 });
 
 // ── 딜 관리 ─────────────────────────────────────────────────
@@ -311,13 +271,12 @@ router.delete('/admin/deals/:id', (req, res) => {
   const row = db.prepare('SELECT id FROM deals WHERE id = ?').get(id);
   if (!row) return res.status(404).json({ error: '딜을 찾을 수 없습니다.' });
 
-  const booked = db
-    .prepare("SELECT COUNT(*) AS c FROM bookings WHERE deal_id = ? AND status IN ('pending','confirmed')")
-    .get(id).c;
-  if (booked > 0) {
-    // 삭제하면 예약의 deal_id 가 NULL 이 되어 추적이 어려워진다. 숨김을 권한다.
+  // 삭제하면 이 딜의 클릭 집계가 deal_id NULL 로 끊긴다.
+  // (비정규화 컬럼 덕에 업체·차종별 집계는 남는다)
+  const clicks = db.prepare('SELECT COUNT(*) AS c FROM outbound_clicks WHERE deal_id = ?').get(id).c;
+  if (clicks > 0 && req.query.force !== '1') {
     return res.status(409).json({
-      error: `진행 중인 예약이 ${booked}건 있습니다. 삭제 대신 '숨김' 처리를 권합니다.`,
+      error: `송출 클릭 ${clicks}건이 연결돼 있습니다. 삭제 대신 '숨김'을 권합니다. 그래도 지우려면 force=1.`,
     });
   }
 

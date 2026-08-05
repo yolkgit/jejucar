@@ -454,327 +454,31 @@ async function openDealDetail(id) {
     ${d.notes ? `<div class="section-title">안내</div><div style="font-size:13px;color:var(--text-2);line-height:1.65">${esc(d.notes)}</div>` : ''}
   `;
 
-  const foot = data.available === false
-    ? '<button class="secondary-btn" id="closeDetail">닫기</button>'
-    : `<div class="price-sum">
-         <div class="label">1일 요금</div>
+  // 이 앱은 예약을 받지 않는다. 판매처 상품 페이지로 보내는 것이 전부다.
+  // 목적지 호스트를 미리 보여줘서 어디로 가는지 알고 누르게 한다.
+  const host = destHost(d.detailUrl);
+  const canGo = data.available !== false && Boolean(host);
+
+  const foot = canGo
+    ? `<div class="price-sum">
+         <div class="label">${esc(host)} 에서 예약</div>
          <div class="value">${won(d.salePrice)}원</div>
        </div>
-       <button class="primary-btn" id="toBooking">예약 신청</button>`;
+       <a class="primary-btn" id="toSource" href="/go/${d.id}" target="_blank" rel="noopener noreferrer nofollow">예약하러 가기</a>`
+    : `<button class="secondary-btn" id="closeDetail">닫기</button>`;
 
   openModal({ title: '특가 상세', body, foot });
 
-  if ($('#toBooking')) $('#toBooking').addEventListener('click', () => openBookingForm(d));
   if ($('#closeDetail')) $('#closeDetail').addEventListener('click', closeModal);
 }
 
-// ── 예약 신청 ─────────────────────────────────────────────
-function openBookingForm(d) {
-  // 딜마다 이용 가능 기간이 다르다. 오늘 날짜를 그대로 넣으면 유효기간이
-  // 아직 시작되지 않은 특가에서 폼을 열자마자 오류가 뜬다.
-  // 선택 가능한 최솟값은 '오늘'과 'valid_from' 중 늦은 쪽이다.
-  const minDate = d.validFrom && d.validFrom > todayStr() ? d.validFrom : todayStr();
-  const maxDate = d.validTo || '';
-
-  let from = $('#pickupDate').value || minDate;
-  if (from < minDate) from = minDate;
-  if (maxDate && from > maxDate) from = minDate;
-
-  let to = $('#returnDate').value || addDays(from, Math.max(1, d.minDays));
-  if (to <= from) to = addDays(from, Math.max(1, d.minDays));
-
-  const body = document.createElement('div');
-  body.innerHTML = `
-    <div class="detail-hero" style="padding:11px">
-      <div class="model" style="font-size:16px">${esc(d.carModel)}</div>
-      <div class="vendor">${esc(d.vendor)} · 1일 ${won(d.salePrice)}원</div>
-    </div>
-
-    <div class="section-title">대여 일정</div>
-    <div class="search-grid">
-      <div class="field">
-        <label for="bkPickDate">대여일</label>
-        <input type="date" id="bkPickDate" value="${esc(from)}" min="${esc(minDate)}"${maxDate ? ` max="${esc(maxDate)}"` : ''}>
-      </div>
-      <div class="field">
-        <label for="bkPickTime">대여 시각</label>
-        <input type="time" id="bkPickTime" value="10:00" step="1800">
-      </div>
-      <div class="field">
-        <label for="bkRetDate">반납일</label>
-        <input type="date" id="bkRetDate" value="${esc(to)}" min="${esc(minDate)}">
-      </div>
-      <div class="field">
-        <label for="bkRetTime">반납 시각</label>
-        <input type="time" id="bkRetTime" value="10:00" step="1800">
-      </div>
-      <div class="field full">
-        <label for="bkPlace">픽업 장소</label>
-        <input type="text" id="bkPlace" value="${esc(d.pickupLocation || '')}" placeholder="예: 제주공항 셔틀">
-      </div>
-      <div class="field full">
-        <span class="hint">${[
-          d.validFrom || d.validTo
-            ? `이용 가능 기간 ${esc(d.validFrom) || '제한 없음'} ~ ${esc(d.validTo) || '제한 없음'}`
-            : null,
-          d.minDays > 1 ? `최소 ${d.minDays}일 대여` : null,
-        ].filter(Boolean).join(' · ')}</span>
-      </div>
-    </div>
-
-    <div class="section-title">신청자 정보</div>
-    <div class="search-grid">
-      <div class="field">
-        <label for="bkName">이름 <span style="color:var(--red)">*</span></label>
-        <input type="text" id="bkName" autocomplete="name" placeholder="홍길동">
-      </div>
-      <div class="field">
-        <label for="bkPhone">연락처 <span style="color:var(--red)">*</span></label>
-        <input type="tel" id="bkPhone" autocomplete="tel" placeholder="010-1234-5678" inputmode="numeric">
-      </div>
-      <div class="field full">
-        <label for="bkEmail">이메일 (선택)</label>
-        <input type="email" id="bkEmail" autocomplete="email" placeholder="me@example.com">
-      </div>
-      <div class="field">
-        <label for="bkAge">운전자 나이${d.minAge ? ' <span style="color:var(--red)">*</span>' : ''}</label>
-        <input type="number" id="bkAge" min="18" max="100" placeholder="${d.minAge ? `만 ${d.minAge}세 이상` : '만 나이'}" inputmode="numeric">
-      </div>
-      <div class="field">
-        <label for="bkLic">면허 경과 연수${d.minLicenseYears ? ' <span style="color:var(--red)">*</span>' : ''}</label>
-        <input type="number" id="bkLic" min="0" max="80" placeholder="${d.minLicenseYears ? `${d.minLicenseYears}년 이상` : '년'}" inputmode="numeric">
-      </div>
-      <div class="field full">
-        <label for="bkMemo">요청사항 (선택)</label>
-        <textarea id="bkMemo" rows="2" placeholder="유아 카시트 필요 등"></textarea>
-      </div>
-    </div>
-
-    <div class="section-title">개인정보 수집·이용 동의 (필수)</div>
-    <div class="consent">
-      <table>
-        <tr><th>수집 항목</th><td>이름, 연락처, 이메일(선택), 운전자 나이, 면허 취득 경과 연수, 요청사항</td></tr>
-        <tr><th>이용 목적</th><td>렌터카 예약 신청 접수 및 확정 안내, 신청자 본인 확인</td></tr>
-        <tr><th>보유 기간</th><td>신청일로부터 1년. 취소·반려 시 60일 후 파기</td></tr>
-      </table>
-      <p class="refuse">
-        동의를 거부할 권리가 있으며, 거부 시 예약 신청이 불가합니다.
-        운전면허번호·주민등록번호는 수집하지 않으며, 자격 확인은 차량 인수 시 현장에서 면허증으로 진행됩니다.
-      </p>
-      <label class="check-row">
-        <input type="checkbox" id="bkAgree">
-        <span>위 내용을 확인했으며 개인정보 수집·이용에 동의합니다.</span>
-      </label>
-    </div>
-
-    <div id="bkError" style="margin-top:12px"></div>
-  `;
-
-  const foot = document.createElement('div');
-  foot.style.display = 'contents';
-  foot.innerHTML = `
-    <div class="price-sum">
-      <div class="label" id="bkSumLabel">기간을 선택하세요</div>
-      <div class="value" id="bkSumValue">-</div>
-    </div>
-    <button class="primary-btn" id="bkSubmit">신청하기</button>`;
-
-  openModal({ title: '예약 신청', body, foot });
-
-  const recalc = () => {
-    const days = dayCount($('#bkPickDate').value, $('#bkRetDate').value);
-    const effective = Math.max(days, 0);
-    if (effective < 1) {
-      $('#bkSumLabel').textContent = '반납일이 대여일보다 뒤여야 합니다';
-      $('#bkSumValue').textContent = '-';
-      return;
-    }
-    $('#bkSumLabel').textContent = `${effective}일 × ${won(d.salePrice)}원`;
-    $('#bkSumValue').textContent = `${won(effective * d.salePrice)}원`;
-  };
-
-  ['#bkPickDate', '#bkRetDate'].forEach((sel) => $(sel).addEventListener('change', () => {
-    // 반납일이 대여일보다 앞이면 자동으로 밀어준다.
-    if ($('#bkRetDate').value < $('#bkPickDate').value) {
-      $('#bkRetDate').value = addDays($('#bkPickDate').value, Math.max(1, d.minDays));
-    }
-    recalc();
-  }));
-  recalc();
-
-  $('#bkSubmit').addEventListener('click', async () => {
-    const btn = $('#bkSubmit');
-    const errHost = $('#bkError');
-    errHost.innerHTML = '';
-    $$('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
-
-    const payload = {
-      dealId: d.id,
-      pickupAt: `${$('#bkPickDate').value} ${$('#bkPickTime').value}`,
-      returnAt: `${$('#bkRetDate').value} ${$('#bkRetTime').value}`,
-      pickupPlace: $('#bkPlace').value,
-      name: $('#bkName').value,
-      phone: $('#bkPhone').value,
-      email: $('#bkEmail').value,
-      driverAge: $('#bkAge').value,
-      licenseYears: $('#bkLic').value,
-      memo: $('#bkMemo').value,
-      agreePrivacy: $('#bkAgree').checked,
-    };
-
-    btn.disabled = true;
-    btn.textContent = '신청 중…';
-    try {
-      const r = await api('/api/bookings', { method: 'POST', body: payload });
-      showBookingDone(r);
-    } catch (err) {
-      errHost.innerHTML = `<div class="notice error"><span class="icon" aria-hidden="true">!</span><span>${esc(err.message)}</span></div>`;
-      const fieldMap = {
-        name: '#bkName', phone: '#bkPhone', email: '#bkEmail',
-        pickupAt: '#bkPickDate', returnAt: '#bkRetDate',
-        driverAge: '#bkAge', licenseYears: '#bkLic', agreePrivacy: '#bkAgree',
-      };
-      const target = fieldMap[err.field];
-      if (target && $(target)) {
-        $(target).setAttribute('aria-invalid', 'true');
-        $(target).focus();
-      }
-      errHost.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '신청하기';
-    }
-  });
-}
-
-function showBookingDone(r) {
-  openModal({
-    title: '신청 완료',
-    body: `
-      <div class="done">
-        <div class="mark" aria-hidden="true">✓</div>
-        <div style="font-size:15.5px;font-weight:800">예약 신청이 접수되었습니다</div>
-        <div class="code">${esc(r.code)}</div>
-        <div class="note">
-          위 <strong>예약번호</strong>와 신청하신 <strong>연락처</strong>로 조회·취소할 수 있습니다.<br>
-          예약번호를 꼭 저장해 주세요.
-        </div>
-        <table class="spec-table" style="margin-top:16px;text-align:left">
-          <tr><th>대여</th><td>${esc(fmtDateTime(r.pickupAt))}</td></tr>
-          <tr><th>반납</th><td>${esc(fmtDateTime(r.returnAt))}</td></tr>
-          <tr><th>기간</th><td>${r.days}일</td></tr>
-          <tr><th>예상 금액</th><td>${won(r.quotedPrice)}원</td></tr>
-          <tr><th>상태</th><td><span class="status-pill pending">확인 대기</span></td></tr>
-        </table>
-        <div class="notice info" style="margin-top:14px;text-align:left">
-          <span class="icon" aria-hidden="true">i</span>
-          <span>아직 <strong>확정된 예약이 아닙니다.</strong> 업체 확인 후 확정 여부를 안내드립니다.
-          결제는 이루어지지 않았습니다.</span>
-        </div>
-      </div>`,
-    foot: '<button class="primary-btn" id="doneClose" style="width:100%">확인</button>',
-  });
-  $('#doneClose').addEventListener('click', () => {
-    closeModal();
-    loadDeals();
-  });
-}
-
-// ── 예약 조회 ─────────────────────────────────────────────
-function openLookup() {
-  const body = `
-    <div class="search-grid">
-      <div class="field full">
-        <label for="lkCode">예약번호</label>
-        <input type="text" id="lkCode" placeholder="JJ-XXXX-XXXX" autocomplete="off" style="letter-spacing:1px">
-      </div>
-      <div class="field full">
-        <label for="lkPhone">연락처</label>
-        <input type="tel" id="lkPhone" placeholder="010-1234-5678" inputmode="numeric">
-      </div>
-    </div>
-    <div id="lkResult" style="margin-top:14px"></div>`;
-
-  openModal({
-    title: '예약 조회 · 취소',
-    body,
-    foot: '<button class="primary-btn" id="lkSubmit" style="width:100%">조회하기</button>',
-  });
-
-  const doLookup = async () => {
-    const host = $('#lkResult');
-    const btn = $('#lkSubmit');
-    host.innerHTML = '';
-    btn.disabled = true;
-    try {
-      const r = await api('/api/bookings/lookup', {
-        method: 'POST',
-        body: { code: $('#lkCode').value, phone: $('#lkPhone').value },
-      });
-      renderLookupResult(r.booking);
-    } catch (err) {
-      host.innerHTML = `<div class="notice error"><span class="icon" aria-hidden="true">!</span><span>${esc(err.message)}</span></div>`;
-    } finally {
-      btn.disabled = false;
-    }
-  };
-
-  $('#lkSubmit').addEventListener('click', doLookup);
-  $('#lkPhone').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doLookup();
-  });
-}
-
-const STATUS_LABEL = {
-  pending: '확인 대기',
-  confirmed: '예약 확정',
-  cancelled: '취소됨',
-  rejected: '반려됨',
-};
-
-function renderLookupResult(b) {
-  const host = $('#lkResult');
-  const d = b.deal || {};
-  const canCancel = b.status === 'pending' || b.status === 'confirmed';
-
-  host.innerHTML = `
-    <div class="detail-hero" style="padding:12px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span class="status-pill ${esc(b.status)}">${esc(STATUS_LABEL[b.status] || b.status)}</span>
-      </div>
-      <div class="model" style="font-size:17px">${esc(d.carModel || '차량 정보 없음')}</div>
-      <div class="vendor">${esc(d.vendor || '')}</div>
-    </div>
-    <table class="spec-table">
-      <tr><th>예약번호</th><td style="font-family:monospace;letter-spacing:.5px">${esc(b.code)}</td></tr>
-      <tr><th>신청자</th><td>${esc(b.name)}</td></tr>
-      <tr><th>대여</th><td>${esc(fmtDateTime(b.pickupAt))}</td></tr>
-      <tr><th>반납</th><td>${esc(fmtDateTime(b.returnAt))}</td></tr>
-      <tr><th>기간</th><td>${b.days}일</td></tr>
-      <tr><th>픽업 장소</th><td>${esc(b.pickupPlace) || '-'}</td></tr>
-      <tr><th>예상 금액</th><td>${won(b.quotedPrice)}원</td></tr>
-      <tr><th>신청일</th><td>${esc(b.createdAt)}</td></tr>
-      ${b.adminMemo ? `<tr><th>업체 안내</th><td>${esc(b.adminMemo)}</td></tr>` : ''}
-    </table>
-    ${canCancel ? '<button class="secondary-btn" id="lkCancel" style="margin-top:14px">이 신청 취소하기</button>' : ''}`;
-
-  if (canCancel) {
-    $('#lkCancel').addEventListener('click', async () => {
-      if (!confirm('이 예약 신청을 취소하시겠습니까? 되돌릴 수 없습니다.')) return;
-      const btn = $('#lkCancel');
-      btn.disabled = true;
-      try {
-        const r = await api('/api/bookings/cancel', {
-          method: 'POST',
-          body: { code: $('#lkCode').value, phone: $('#lkPhone').value },
-        });
-        toast('신청이 취소되었습니다.');
-        renderLookupResult(r.booking);
-      } catch (err) {
-        toast(err.message, 'error');
-        btn.disabled = false;
-      }
-    });
+/** 링크의 도메인만 뽑는다. 어디로 나가는지 사용자에게 밝히기 위해서다. */
+function destHost(url) {
+  if (!url) return null;
+  try {
+    return new URL(url).host.replace(/^www\./, '');
+  } catch {
+    return null;
   }
 }
 
@@ -816,7 +520,6 @@ function init() {
     loadDeals();
   });
 
-  $('#lookupBtn').addEventListener('click', openLookup);
   $('#logo').addEventListener('click', () => {
     state.filters = { carClass: [], sort: 'discount', page: 1 };
     $('#q').value = '';

@@ -32,6 +32,28 @@ function apiDate(d, hour = 10) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(hour)}:00:00`;
 }
 
+/**
+ * 상품 예약 페이지 딥링크.
+ *
+ * 이 앱은 예약을 받지 않고 원 사이트로 보내기만 하므로 이 링크가 핵심 산출물이다.
+ * 형식은 돌하루팡 프런트엔드 코드에서 그대로 가져왔다:
+ *   `/cars/reservation?${new URLSearchParams({productDetailId, optionIndex, startDate, endDate})}`
+ *
+ * ptnid/kwdid/subid/b2bType 파라미터도 지원하는데, 제휴(파트너) 추적용이다.
+ * 제휴 계약을 맺으면 PARTNER_ID 를 넣어 수수료를 받을 수 있다.
+ */
+function deepLink({ productDetailId, startDate, endDate, optionIndex = 0 }) {
+  const q = new URLSearchParams({
+    productDetailId,
+    optionIndex: String(optionIndex),
+    startDate,
+    endDate,
+  });
+  const ptn = (process.env.DOLHARUPANG_PARTNER_ID || '').trim();
+  if (ptn) q.set('ptnid', ptn);
+  return `${BASE}/cars/reservation?${q.toString()}`;
+}
+
 function addDays(date, n) {
   const d = new Date(date);
   d.setDate(d.getDate() + n);
@@ -148,7 +170,9 @@ module.exports = {
           stock: Number.isFinite(offer.availableQuantity) ? offer.availableQuantity : null,
           pickup_location: '제주공항 셔틀',
           image_url: item.imageUrl || null,
-          detail_url: `${BASE}/cars`,
+          // 이 앱의 목적은 원 사이트 상품으로 보내는 것이다. 목록 페이지가 아니라
+          // 해당 상품·해당 날짜의 예약 화면으로 바로 연결한다.
+          detail_url: deepLink({ productDetailId: id, startDate: startStr, endDate: endStr }),
           // 가격이 어느 날짜 기준인지 반드시 남긴다. 성수기/비수기 차이가 10배까지 난다.
           notes: [
             `${refDate} 기준 ${this.nights}일 요금`,

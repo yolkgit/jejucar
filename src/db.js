@@ -31,8 +31,39 @@ function ensureColumn(table, column, ddl) {
   return true;
 }
 
-// 개인정보 수집·이용 동의 시각. 개인정보보호법 제15조상 동의 사실을 남겨야 한다.
-ensureColumn('bookings', 'privacy_agreed_at', 'TEXT');
+/**
+ * 예약 접수 기능을 걷어내면서 bookings 테이블도 제거한다.
+ * 이 앱은 원 사이트로 연결만 하므로 예약 데이터를 보유할 이유가 없고,
+ * 개인정보를 들고 있는 것 자체가 위험이다(이름·연락처·이메일).
+ *
+ * 다만 데이터가 남아 있으면 말없이 지우지 않는다. 옮겨 놓고 사람이 판단하게 한다.
+ */
+function dropBookingsTable() {
+  const exists = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='bookings'")
+    .get();
+  if (!exists) return;
+
+  const count = db.prepare('SELECT COUNT(*) c FROM bookings').get().c;
+  if (count > 0) {
+    // 남은 예약이 있으면 백업 테이블로 옮기고 경고한다.
+    const backup = 'bookings_archived';
+    const already = db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
+      .get(backup);
+    if (!already) {
+      db.exec(`ALTER TABLE bookings RENAME TO ${backup}`);
+      console.warn(
+        `[마이그레이션] 예약 ${count}건이 남아 있어 삭제하지 않고 '${backup}' 로 옮겼습니다. ` +
+          `개인정보가 포함돼 있으니 확인 후 직접 정리하세요.`
+      );
+      return;
+    }
+  }
+  db.exec('DROP TABLE bookings');
+  console.log('[마이그레이션] 예약 접수 기능 제거 — bookings 테이블 삭제');
+}
+dropBookingsTable();
 
 /**
  * deals.list_price / discount_pct 를 NOT NULL 에서 NULL 허용으로 바꾼다.

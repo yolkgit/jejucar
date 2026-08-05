@@ -122,46 +122,6 @@ test('deals: valid_to 가 valid_from 보다 빠르면 거부한다', () => {
   );
 });
 
-test('bookings: 반납이 대여보다 빠르면 거부한다', () => {
-  assert.throws(
-    () =>
-      db
-        .prepare(
-          `INSERT INTO bookings (code, days, quoted_price, pickup_at, return_at, name, phone, snapshot_json)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-        )
-        .run('JJ-AAAA-BBBB', 1, 1000, '2026-08-10 10:00', '2026-08-09 10:00', '홍길동', '01011112222', '{}'),
-    /CHECK constraint failed/
-  );
-});
-
-test('bookings: 예약번호는 중복될 수 없다', () => {
-  const ins = db.prepare(
-    `INSERT INTO bookings (code, days, quoted_price, pickup_at, return_at, name, phone, snapshot_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  );
-  ins.run('JJ-CCCC-DDDD', 1, 1000, '2026-08-10 10:00', '2026-08-11 10:00', '홍길동', '01011112222', '{}');
-  assert.throws(
-    () => ins.run('JJ-CCCC-DDDD', 1, 1000, '2026-08-10 10:00', '2026-08-11 10:00', '김철수', '01033334444', '{}'),
-    /UNIQUE constraint failed/
-  );
-});
-
-test('bookings: 딜이 지워져도 예약은 스냅샷과 함께 살아남는다', () => {
-  const dealId = db.prepare('SELECT id FROM deals WHERE external_id = ?').get('d2').id;
-  db.prepare(
-    `INSERT INTO bookings (code, deal_id, days, quoted_price, pickup_at, return_at, name, phone, snapshot_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run('JJ-EEEE-FFFF', dealId, 2, 78000, '2026-08-10 10:00', '2026-08-12 10:00', '홍길동', '01011112222',
-    JSON.stringify({ car_model: '아반떼 CN7', sale_price: 39000 }));
-
-  db.prepare('DELETE FROM deals WHERE id = ?').run(dealId);
-
-  const row = db.prepare('SELECT deal_id, snapshot_json FROM bookings WHERE code = ?').get('JJ-EEEE-FFFF');
-  assert.equal(row.deal_id, null, 'ON DELETE SET NULL 이 동작하지 않았다');
-  assert.equal(JSON.parse(row.snapshot_json).car_model, '아반떼 CN7');
-});
-
 test('expireStaleDeals: 기간 지난 딜만 expired 로 내린다', () => {
   upsertDeal({ ...base, external_id: 'old', valid_from: '2020-01-01', valid_to: '2020-01-02' });
   upsertDeal({ ...base, external_id: 'live', valid_from: '2026-01-01', valid_to: '2099-12-31' });

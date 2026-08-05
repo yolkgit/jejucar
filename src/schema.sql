@@ -106,47 +106,26 @@ CREATE INDEX IF NOT EXISTS idx_deals_valid    ON deals (status, valid_from, vali
 CREATE INDEX IF NOT EXISTS idx_deals_source   ON deals (source_id, last_seen_at);
 CREATE INDEX IF NOT EXISTS idx_deals_vendor   ON deals (vendor_name);
 
--- ── 예약 신청 ────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS bookings (
-  id             INTEGER PRIMARY KEY,
-  code           TEXT    NOT NULL UNIQUE,   -- 'JJ-XXXX-XXXX'
-  -- 딜이 만료·삭제돼도 예약 기록은 남아야 하므로 참조는 SET NULL,
-  -- 실제 예약 내용은 snapshot_json 에 동결해 보관한다.
-  deal_id        INTEGER REFERENCES deals(id) ON DELETE SET NULL,
-  snapshot_json  TEXT    NOT NULL,
-
-  days           INTEGER NOT NULL CHECK (days >= 1),
-  quoted_price   INTEGER NOT NULL CHECK (quoted_price >= 0),  -- 총 견적(원)
-
-  pickup_at      TEXT    NOT NULL,          -- 'YYYY-MM-DD HH:MM'
-  return_at      TEXT    NOT NULL,
-  pickup_place   TEXT,
-
-  name           TEXT    NOT NULL,
-  phone          TEXT    NOT NULL,          -- 숫자만 정규화해 저장
-  email          TEXT,
-  driver_age     INTEGER CHECK (driver_age IS NULL OR driver_age BETWEEN 18 AND 100),
-  license_years  INTEGER CHECK (license_years IS NULL OR license_years >= 0),
-  memo           TEXT,
-
-  -- 개인정보 수집·이용에 동의한 시각. 동의 없이 접수하지 않는다.
-  privacy_agreed_at TEXT,
-
-  status         TEXT    NOT NULL DEFAULT 'pending'
-                         CHECK (status IN ('pending', 'confirmed', 'cancelled', 'rejected')),
-  admin_memo     TEXT,
-  cancelled_by   TEXT    CHECK (cancelled_by IS NULL OR cancelled_by IN ('user', 'admin')),
-
-  created_at     TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
-  updated_at     TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
-
-  CHECK (return_at > pickup_at)
+-- ── 송출 클릭 ────────────────────────────────────────────────
+-- 이 앱은 예약을 받지 않는다. 특가를 찾아 원 사이트 상품 페이지로 보내는 것이 전부다.
+-- 그래서 "얼마나 보냈는가"가 유일한 성과 지표다.
+--
+-- 개인정보는 저장하지 않는다. IP·User-Agent·쿠키 모두 남기지 않으며,
+-- 어떤 딜이 언제 클릭됐는지만 센다. 집계 외 용도가 없기 때문이다.
+CREATE TABLE IF NOT EXISTS outbound_clicks (
+  id          INTEGER PRIMARY KEY,
+  -- 딜이 만료·삭제돼도 집계는 남아야 하므로 SET NULL + 비정규화 컬럼을 함께 둔다.
+  deal_id     INTEGER REFERENCES deals(id) ON DELETE SET NULL,
+  source_key  TEXT,
+  vendor_name TEXT,
+  car_model   TEXT,
+  sale_price  INTEGER,
+  clicked_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_bookings_status  ON bookings (status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_bookings_phone   ON bookings (phone);
-CREATE INDEX IF NOT EXISTS idx_bookings_pickup  ON bookings (pickup_at);
-CREATE INDEX IF NOT EXISTS idx_bookings_deal    ON bookings (deal_id);
+CREATE INDEX IF NOT EXISTS idx_clicks_time   ON outbound_clicks (clicked_at DESC);
+CREATE INDEX IF NOT EXISTS idx_clicks_deal   ON outbound_clicks (deal_id);
+CREATE INDEX IF NOT EXISTS idx_clicks_source ON outbound_clicks (source_key, clicked_at DESC);
 
 -- ── 수집 로그 ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS crawl_logs (

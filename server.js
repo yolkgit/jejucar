@@ -6,7 +6,7 @@ const express = require('express');
 const { PORT } = require('./src/config');
 const { db, expireStaleDeals } = require('./src/db');
 const { router: dealsRouter } = require('./src/routes/deals');
-const { router: bookingsRouter } = require('./src/routes/bookings');
+const { router: goRouter } = require('./src/routes/go');
 const { router: adminRouter } = require('./src/routes/admin');
 const { startScheduler, loadAdapters } = require('./src/collector');
 const { ensureSource } = require('./src/db');
@@ -32,8 +32,9 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', dealsRouter);
-app.use('/api', bookingsRouter);
 app.use('/api', adminRouter);
+// 송출은 /api 아래가 아니라 최상위다. 사용자가 브라우저 주소창에서 보게 되는 링크다.
+app.use('/', goRouter);
 
 app.get('/api/health', (req, res) => {
   const deals = db.prepare("SELECT COUNT(*) AS c FROM deals WHERE status = 'active'").get().c;
